@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 
-MAINTAINER Florin Patan "florinpatan@gmail.com"
+MAINTAINER Ozan Yurtseven "ozanyurt@gmail.com"
 
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
@@ -9,7 +9,10 @@ RUN sed 's/main$/main universe/' -i /etc/apt/sources.list && \
     apt-get update -qq && \
     echo 'Installing OS dependencies' && \
     apt-get install -qq -y --fix-missing sudo software-properties-common git libxext-dev libxrender-dev libxslt1.1 \
-        libxtst-dev libgtk2.0-0 libcanberra-gtk-module unzip wget && \
+        libxtst-dev libgtk2.0-0 libcanberra-gtk-module unzip wget build-essential && \
+	echo 'installing nodejs 6.4'
+	curl -sL https://deb.nodesource.com/setup_6.4 | sudo -E bash - && \
+	sudo apt-get install -qq -y nodejs && \
     echo 'Cleaning up' && \
     apt-get clean -qq -y && \
     apt-get autoclean -qq -y && \
@@ -27,35 +30,29 @@ RUN echo 'Creating user: developer' && \
     sudo chown root:root /usr/bin/sudo && \
     chmod 4755 /usr/bin/sudo
 
-RUN mkdir -p /home/developer/.IdeaIC2016.2/config/options && \
-    mkdir -p /home/developer/.IdeaIC2016.2/config/plugins
+RUN mkdir -p /home/developer/.WebStorm2016.2/config/options && \
+    mkdir -p /home/developer/.WebStorm2016.2/config/plugins
 
-ADD ./jdk.table.xml /home/developer/.IdeaIC2016.2/config/options/jdk.table.xml
+ADD ./jdk.table.xml /home/developer/.WebStorm2016.2/config/options/jdk.table.xml
 ADD ./jdk.table.xml /home/developer/.jdk.table.xml
 
-ADD ./run /usr/local/bin/intellij
+ADD ./run /usr/local/bin/wstorm
 
-RUN chmod +x /usr/local/bin/intellij && \
-    chown developer:developer -R /home/developer/.IdeaIC2016.2
+RUN chmod +x /usr/local/bin/wstorm && \
+    chown developer:developer -R /home/developer/.WebStorm2016.2
 
-RUN echo 'Downloading IntelliJ IDEA' && \
-    wget https://download.jetbrains.com/idea/ideaIC-2016.2.tar.gz -O /tmp/intellij.tar.gz -q && \
-    echo 'Installing IntelliJ IDEA' && \
-    mkdir -p /opt/intellij && \
-    tar -xf /tmp/intellij.tar.gz --strip-components=1 -C /opt/intellij && \
-    rm /tmp/intellij.tar.gz
+RUN echo 'Downloading Webstorm' && \
+    wget https://download.jetbrains.com/webstorm/WebStorm-2016.2.2.tar.gz -O /tmp/wstorm.tar.gz -q && \
+    echo 'Installing Webstorm' && \
+    mkdir -p /opt/wstorm && \
+    tar -xf /tmp/wstorm.tar.gz --strip-components=1 -C /opt/wstorm && \
+    rm /tmp/wstorm.tar.gz
 
 RUN echo 'Downloading Go 1.6.3' && \
     wget https://storage.googleapis.com/golang/go1.6.3.linux-amd64.tar.gz -O /tmp/go.tar.gz -q && \
     echo 'Installing Go 1.6.3' && \
     sudo tar -zxf /tmp/go.tar.gz -C /usr/local/ && \
     rm -f /tmp/go.tar.gz
-
-RUN echo 'Installing Go plugin' && \
-    wget https://plugins.jetbrains.com/files/5047/27278/Go-0.12.1724.zip -O /home/developer/.IdeaIC2016.2/config/plugins/go.zip -q && \
-    cd /home/developer/.IdeaIC2016.2/config/plugins/ && \
-    unzip -q go.zip && \
-    rm go.zip
 
 RUN echo 'Installing Markdown plugin' && \
     wget https://plugins.jetbrains.com/files/7793/25156/markdown-2016.1.20160405.zip -O markdown.zip -q && \
@@ -69,4 +66,4 @@ ENV HOME /home/developer
 ENV GOPATH /home/developer/go
 ENV PATH $PATH:/home/developer/go/bin:/usr/local/go/bin
 WORKDIR /home/developer/go
-CMD /usr/local/bin/intellij
+CMD /usr/local/bin/wstorm
